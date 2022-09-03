@@ -11,4 +11,11 @@
 
 ## Executando o Container do Redis
 
-* ```docker run -p 6379:6379 -d redis```
+* ```docker container run --name my-redis -p 6379:6379 -d redis```
+* ```docker container exec -it my-redis sh```
+  * ```redis-cli```
+    * ```ping```
+    * ```set name redis-sample```
+    * ```get name```
+    * ```incr count```
+    * ```get count```
