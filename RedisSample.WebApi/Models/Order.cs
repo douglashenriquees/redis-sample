@@ -2,25 +2,27 @@ namespace RedisSample.WebApi.Models;
 
 public class Order
 {
-    public int OrderId { get; set; }
+    public int id { get; set; }
 
-    public char CustomerId { get; set; }
+    public string customerId { get; set; } = string.Empty;
 
-    public int EmployeeId { get; set; }
+    public int employeeId { get; set; }
 
-    public DateTime? RequiredDate { get; set; }
+    public DateTime? orderDate { get; set; }
 
-    public DateTime? ShippedDate { get; set; }
+    public DateTime? requiredDate { get; set; }
 
-    public int ShipVia { get; set; }
+    public int shipVia { get; set; }
 
-    public decimal Freight { get; set; }
+    public decimal freight { get; set; }
 
-    public string ShipName { get; set; } = string.Empty;
+    public string shipName { get; set; } = string.Empty;
 
-    public string ShipAddress { get; set; } = string.Empty;
+    public string shipAddress { get; set; } = string.Empty;
 
-    public string ShipCity { get; set; } = string.Empty;
+    public string shipCity { get; set; } = string.Empty;
 
-    public string ShipRegion { get; set; } = string.Empty;
+    public string shipPostalCode { get; set; } = string.Empty;
+
+    public string shipCountry { get; set; } = string.Empty;
 }

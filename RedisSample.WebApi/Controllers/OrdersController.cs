@@ -1,6 +1,5 @@
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
 using RedisSample.WebApi.Models;
@@ -8,16 +7,14 @@ using RedisSample.WebApi.Models;
 namespace RedisSample.WebApi.Controllers;
 
 [ApiController]
-[Route("[conroller]")]
+[Route("[controller]")]
 public class OrdersController : ControllerBase
 {
     private readonly IDistributedCache distributedCache;
-    private readonly NorthwindContext context;
 
-    public OrdersController(IDistributedCache distributedCache, NorthwindContext context)
+    public OrdersController(IDistributedCache distributedCache)
     {
         this.distributedCache = distributedCache;
-        this.context = context;
     }
 
     [HttpGet("redis")]
@@ -25,19 +22,21 @@ public class OrdersController : ControllerBase
     {
         var cacheKey = "orderList";
         var serializeOrderList = string.Empty;
-        var orderList = new List<Order>();
+        var result = new Result();
 
         var redisOrderList = await distributedCache.GetAsync(cacheKey);
 
         if (redisOrderList != null)
         {
             serializeOrderList = Encoding.UTF8.GetString(redisOrderList);
-            orderList = JsonConvert.DeserializeObject<List<Order>>(serializeOrderList);
+            result = JsonConvert.DeserializeObject<Result>(serializeOrderList);
         }
         else
         {
-            orderList = await context?.Orders?.ToListAsync();
-            serializeOrderList = JsonConvert.SerializeObject(orderList);
+            var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync("https://northwind.netcore.io/orders.json");
+
+            serializeOrderList = await response.Content.ReadAsStringAsync();
             redisOrderList = Encoding.UTF8.GetBytes(serializeOrderList);
 
             var options = new DistributedCacheEntryOptions()
@@ -45,8 +44,10 @@ public class OrdersController : ControllerBase
                 .SetSlidingExpiration(TimeSpan.FromMinutes(2));
 
             await distributedCache.SetAsync(cacheKey, redisOrderList, options);
+
+            result = JsonConvert.DeserializeObject<Result>(serializeOrderList);
         }
 
-        return Ok(orderList);
+        return Ok(result);
     }
 }
